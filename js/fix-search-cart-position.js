@@ -3,50 +3,6 @@
     
     // Function to fix search and cart widgets positioning
     function fixSearchCartPosition() {
-        console.log("Fixing search and cart icons positioning...");
-        
-        // FORCE CORRECT HEADER LAYOUT FIRST
-        const layoutStyle = document.createElement('style');
-        layoutStyle.textContent = `
-            /* Force correct layout structure */
-            #qodef-page-header-inner {
-                display: grid !important;
-                grid-template-columns: 1fr auto 1fr !important;
-                align-items: center !important;
-                justify-items: stretch !important;
-                width: 100% !important;
-            }
-            
-            /* Left column: Navigation */
-            .qodef-header-navigation-area {
-                grid-column: 1 !important;
-                justify-self: flex-start !important;
-            }
-            
-            /* Center column: Logo */
-            .qodef-header-logo-link {
-                grid-column: 2 !important;
-                justify-self: center !important;
-            }
-            
-            /* Right column: Widget holder */
-            .qodef-widget-holder {
-                grid-column: 3 !important;
-                justify-self: flex-end !important;
-                display: flex !important;
-                justify-content: flex-end !important;
-                align-items: center !important;
-            }
-            
-            /* Ensure icons are visible */
-            .qodef-search-opener, 
-            .qodef-woo-dropdown-cart {
-                opacity: 1 !important;
-                visibility: visible !important;
-            }
-        `;
-        document.head.appendChild(layoutStyle);
-        
         // Find widget holder
         let $widgetHolder = $('.qodef-widget-holder');
         
@@ -155,71 +111,6 @@
             console.log("Hiding incorrectly placed cart icons");
             $wrongCartIcons.hide();
         }
-        
-        // Add styles to ensure proper display
-        const style = document.createElement('style');
-        style.textContent = `
-            /* Widget holder positioning */
-            .qodef-widget-holder {
-                grid-column: 3 !important;
-                display: flex !important;
-                justify-content: flex-end !important;
-                align-items: center !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                min-height: 40px !important;
-                margin-left: auto !important;
-            }
-            
-            /* Icon widget styling */
-            .qodef-widget-holder .widget {
-                display: inline-flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                margin: 0 6px !important;
-            }
-            
-            /* Icon specific styling */
-            .qodef-search-opener, 
-            .qodef-woo-dropdown-cart .qodef-m-opener {
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                padding: 5px !important;
-                color: #000 !important;
-                position: relative !important;
-            }
-            
-            /* Icons size */
-            .qodef-search-opener svg, 
-            .qodef-woo-dropdown-cart svg {
-                width: 22px !important;
-                height: 22px !important;
-            }
-            
-            /* Cart counter styling */
-            .qodef-m-opener-count {
-                font-size: 10px !important;
-                background: #e25c2c !important;
-                color: white !important;
-                border-radius: 50% !important;
-                width: 18px !important;
-                height: 18px !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                position: absolute !important;
-                top: -5px !important;
-                right: -5px !important;
-            }
-            
-            /* Hide any search/cart icons outside of widget holder */
-            .qodef-header-navigation-area .qodef-search-opener,
-            .qodef-header-navigation-area .qodef-woo-dropdown-cart {
-                display: none !important;
-            }
-        `;
-        document.head.appendChild(style);
         
         // Make sure widget holder is properly displayed with !important rules
         $widgetHolder.attr('style', 'display: flex !important; justify-content: flex-end !important; align-items: center !important; visibility: visible !important; opacity: 1 !important; grid-column: 3 !important; margin-left: auto !important;');

@@ -1,6 +1,92 @@
 (function($) {
     'use strict';
     
+    // Add immediate CSS style to hide specific subcategory sections
+    const hideSpecificSubcategoriesStyle = document.createElement('style');
+    hideSpecificSubcategoriesStyle.id = 'hide-specific-subcategories';
+    hideSpecificSubcategoriesStyle.textContent = `
+        /* Hide all mega menu subcategories and sections */
+        .mega-menu-subcategories,
+        .mega-menu-subcategory-content,
+        .mega-menu-subcategory-section,
+        [class*="subcategory"][class*="section"]:contains("The Emperor"),
+        [class*="subcategory"][class*="section"]:contains("The Empress"),
+        [class*="subcategory"][class*="content"],
+        [class*="subcategory-links"],
+        [class*="subcategory-title"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            position: absolute !important;
+            margin: -1px !important;
+            padding: 0 !important;
+            border: 0 !important;
+            pointer-events: none !important;
+            max-height: 0 !important;
+            max-width: 0 !important;
+        }
+        
+        /* Only show active subcategory content when category is hovered */
+        .mega-menu-subcategories.active,
+        .mega-menu-subcategory-content.active,
+        .mega-menu-subcategory-content.active .mega-menu-subcategory-section,
+        .mega-menu-subcategory-content.active .mega-menu-subcategory-title,
+        .mega-menu-subcategory-content.active .mega-menu-subcategory-links {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            height: auto !important;
+            width: auto !important;
+            overflow: visible !important;
+            clip: auto !important;
+            position: relative !important;
+            margin: 0 !important;
+            pointer-events: auto !important;
+            max-height: none !important;
+            max-width: none !important;
+        }
+        
+        /* Ensure active subcategory sections display as blocks */
+        .mega-menu-subcategory-content.active .mega-menu-subcategory-section {
+            display: block !important;
+        }
+        
+        /* Hide empty subcategory sections */
+        .mega-menu-subcategory-section:empty,
+        .mega-menu-subcategory-section:has(.mega-menu-subcategory-title:empty),
+        .mega-menu-subcategory-title:empty,
+        .mega-menu-subcategory-title:has(:empty) {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            width: 0 !important;
+            clip: rect(0, 0, 0, 0) !important;
+        }
+        
+        /* Hide links with undefined URLs */
+        a[href="undefined"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+        }
+    `;
+    document.head.appendChild(hideSpecificSubcategoriesStyle);
+    
+    // Immediately hide all original menus and show only our custom menu
+    const hideOriginalMenusImmediately = function() {
+        // Hide all original navigation menus (but not our custom one)
+        $('.qodef-header-navigation').not('#custom-horizontal-menu').hide();
+    };
+    
+    // Run this immediately
+    hideOriginalMenusImmediately();
+    
     // Apply immediate inline style to hide all menus on script load
     const hideAllMenusImmediately = function() {
         // Use both inline styles and direct CSS property manipulation for maximum effect
@@ -10,7 +96,9 @@
         // Purge any active menu classes to prevent theme's JavaScript from activating menus
         $('.menu-item-has-children, .menu-item--wide, .qodef-menu-item--wide').removeClass('qodef-menu-item--open qodef--opened hover-active menu-item-hover');
         
-        console.log("Immediate menu hiding executed");
+        // Also hide all original navigation menus (but not our custom one)
+        hideOriginalMenusImmediately();
+        
     };
     
     // Run this immediately on script load
@@ -21,7 +109,6 @@
     
     // Function to fix menu positioning and hover behavior
     function fixMenuPositioning() {
-        console.log("Fixing menu positioning and hover behavior");
         
         // Aggressive cleanup of all events
         $(document).off('.menuFix');
@@ -31,13 +118,12 @@
         $('.qodef-header-navigation .qodef-drop-down-second').off();
         
         // Debug all menu items
-        console.log("All menu items: ");
         $('.qodef-header-navigation > ul > li').each(function() {
             const $item = $(this);
             const text = $item.text().trim();
             const hasDropdown = $item.find('.sub-menu, .qodef-drop-down-second').length > 0;
             const classes = $item.attr('class') || '';
-            console.log(`Menu item: "${text}" - Has dropdown: ${hasDropdown} - Classes: ${classes}`);
+            
         });
         
         // First, aggressively close all submenus immediately
@@ -589,17 +675,10 @@
         `;
         document.head.appendChild(style);
         
-        // Debug info
-        console.log("Menu status:");
-        console.log("- Header exists: " + ($('#qodef-page-header').length > 0 ? "YES" : "NO"));
-        console.log("- Navigation exists: " + ($('.qodef-header-navigation').length > 0 ? "YES" : "NO"));
-        console.log("- Menu items count: " + $('.qodef-header-navigation > ul > li').length);
-        
         // Get the header
         const $header = $('#qodef-page-header-inner');
         
         if ($header.length > 0) {
-            console.log("Found header, applying direct manipulation");
             
             // Direct manipulation of DOM
             const $navigation = $('.qodef-header-navigation');
@@ -684,20 +763,14 @@
                 $menuLink.off('mouseenter mouseleave mouseover mouseout click');
                 
                 if ($dropdown.length) {
-                    console.log(`Setting up direct hover for: "${menuText}" - Dropdown type: ${$dropdown.hasClass('qodef-drop-down-second') ? 'Mega Menu' : 'Standard Dropdown'}`);
-                    
-                    // Log the structure of the dropdown for debugging
-                    console.log(`Dropdown HTML structure for "${menuText}":`);
-                    const $innerContent = $dropdown.find('.qodef-drop-down-second-inner');
+                         const $innerContent = $dropdown.find('.qodef-drop-down-second-inner');
                     if ($innerContent.length) {
-                        console.log(`- Inner content found: ${$innerContent.length} elements`);
-                        console.log(`- Inner UL elements: ${$innerContent.find('ul').length}`);
-                        console.log(`- Inner LI elements: ${$innerContent.find('li').length}`);
+                     
                     }
                     
                     // Apply hover handlers to both the menu item and the menu link to ensure reliable hovering
                     $menuItem.add($menuLink).on('mouseenter', function(e) {
-                        console.log(`Mouseenter triggered for: "${menuText}"`);
+                      
                         
                         // Close all other dropdowns first - but ONLY close other main menu items, not submenu items
                         $('.qodef-header-navigation > ul > li').not($menuItem).removeClass('hover-active');
@@ -789,7 +862,7 @@
                     // Add more reliable mouse leave detection with better delay and proper containment check
                     let leaveTimer;
                     $menuItem.on('mouseleave', function(e) {
-                        console.log(`Mouseleave triggered for: "${menuText}"`);
+                      
                         
                         // Clear any existing timer
                         clearTimeout(leaveTimer);
@@ -801,25 +874,24 @@
                         // This checks the entire dropdown subtree, not just the immediate dropdown
                         if ($(relatedTarget).closest('.qodef-drop-down-second, .sub-menu').length || 
                             $(relatedTarget).closest('.qodef-header-navigation > ul > li').length) {
-                            console.log(`Skipping hide - moved to menu-related element`);
                             return;
                         }
                         
                         // Only hide if we're completely leaving the entire menu structure
                         leaveTimer = setTimeout(function() {
                             // Check if any menus are opened without hover
-                            if (!$('#custom-horizontal-menu-list > li:hover').length && 
-                                !$('.qodef-header-navigation > ul > li:hover').length && 
-                                !$('.sub-menu:visible').closest(':hover').length && 
-                                !$('.qodef-drop-down-second:visible').closest(':hover').length &&
-                                ($('.sub-menu:visible').length || $('.qodef-drop-down-second:visible').length)) {
-                                console.log("Detected open menu without hover, fixing...");
+                            if (($('.sub-menu:visible').length || $('.qodef-drop-down-second:visible').length) && 
+                                !$('#custom-horizontal-menu-list > li').filter(function() { return $(this).is(':hover'); }).length &&
+                                !$('.qodef-header-navigation > ul > li').filter(function() { return $(this).is(':hover'); }).length && 
+                                !$('.sub-menu:visible').closest('li').filter(function() { return $(this).is(':hover'); }).length && 
+                                !$('.qodef-drop-down-second:visible').closest('li').filter(function() { return $(this).is(':hover'); }).length) {
+                               
                                 hideAllMenusImmediately();
                             }
                             
                             // Only hide if we've completely left the ENTIRE menu structure
                             if (!$('.qodef-header-navigation:hover').length) {
-                                console.log(`Hiding all dropdowns - completely left menu structure`);
+                               
                                 $('.qodef-header-navigation > ul > li').removeClass('hover-active');
                                 $('.qodef-header-navigation .sub-menu, .qodef-header-navigation .qodef-drop-down-second').hide().css({
                                     'display': 'none',
@@ -829,7 +901,7 @@
                                     'height': '0'
                                 }).removeClass('hover-visible');
                             } else {
-                                console.log(`Not hiding dropdown - some part of the menu is still being hovered`);
+                               
                             }
                         }, 250);
                     });
@@ -837,7 +909,6 @@
                     // Add special handling for the dropdown itself
                     $dropdown.off('mouseenter mouseleave').on({
                         mouseenter: function() {
-                            console.log(`Dropdown itself entered for "${menuText}"`);
                             // Clear any pending hide timer
                             clearTimeout(leaveTimer);
                             clearTimeout($menuItem.data('leaveTimerId'));
@@ -867,7 +938,7 @@
                         },
                         mouseleave: function() {
                             var menuText = $menuItem.find('> a').text().trim();
-                            console.log(`Menu item mouse leave: "${menuText}"`);
+                          
 
                             // Clear any existing timer first
                             clearTimeout($menuItem.data('leaveTimerId'));
@@ -879,7 +950,7 @@
                                     // Double check if we're hovering any part of the dropdown structure
                                     if (!$dropdown.find('*:hover').length && 
                                         !$('.qodef-header-navigation .sub-menu:hover, .qodef-header-navigation .qodef-drop-down-second:hover').length) {
-                                        console.log(`Hiding dropdown completely for "${menuText}"`);
+                                       
                                         $menuItem.removeClass('hover-active');
                                         $dropdown.hide().css({
                                             'display': 'none',
@@ -889,12 +960,12 @@
                                             'height': '0'
                                         }).removeClass('hover-visible');
                                     } else {
-                                        console.log(`Not hiding - element within dropdown is hovered`);
+                                       
                                     }
                                 } else {
-                                    console.log(`Not hiding - still within menu structure`);
+                                       
                                 }
-                            }, 150); // Slightly longer timeout for better usability
+                            }, 150);
 
                             // Store timeout ID for cancellation
                             $menuItem.data('leaveTimerId', leaveTimerId);
@@ -938,7 +1009,7 @@
                                     clearTimeout(leaveTimer);
                                     leaveTimer = setTimeout(function() {
                                         if (!$('.qodef-header-navigation:hover').length) {
-                                            console.log(`Left all menus, hiding everything`);
+                                           
                                             $('.qodef-header-navigation > ul > li').removeClass('hover-active');
                                             $('.qodef-header-navigation .sub-menu, .qodef-header-navigation .qodef-drop-down-second').hide().css({
                                                 'display': 'none',
@@ -1023,10 +1094,15 @@
     
     // Run function on document ready
     $(document).ready(function() {
-        console.log("Document ready - initializing menu fix");
         
         // First hide all dropdowns immediately 
         hideAllMenusImmediately();
+        
+        // Hide all subcategory sections
+        hideAllSubcategorySections();
+        
+        // Clean up any duplicate menus
+        cleanupDuplicateMenus();
         
         // Run the main fix function
         fixMenuPositioning();
@@ -1040,7 +1116,9 @@
                 if (mutation.type === 'childList' && 
                     (mutation.target.closest('.qodef-header-navigation') || 
                      mutation.target.closest('.qodef-drop-down-second'))) {
-                    console.log("DOM changes detected in menu area - reapplying fixes");
+                   
+                    hideAllSubcategorySections();
+                    cleanupDuplicateMenus();
                     fixMenuPositioning();
                     forceHorizontalMenuLayout();
                 }
@@ -1056,21 +1134,61 @@
     
     // Also run when page is fully loaded
     $(window).on('load', function() {
-        console.log("Window loaded - fixing menus");
         
         // Force close dropdowns again
         hideAllMenusImmediately();
+        
+        // Hide all subcategory sections
+        hideAllSubcategorySections();
+        
+        // Clean up empty menu sections
+        cleanupEmptyMenuSections();
+        
+        // Clean up any duplicate menus
+        cleanupDuplicateMenus();
         
         // Run the fix function again
         setTimeout(function() {
             fixMenuPositioning();
             forceHorizontalMenuLayout();
+            
+            // Hide subcategory sections again after a delay
+            setTimeout(function() {
+                hideAllSubcategorySections();
+                cleanupEmptyMenuSections();
+            }, 500);
         }, 100);
     });
     
+    // Function to clean up duplicate menus
+    function cleanupDuplicateMenus() {
+        
+        // Remove duplicate custom menus
+        if ($('#custom-horizontal-menu').length > 1) {
+           
+            $('#custom-horizontal-menu').not(':first').remove();
+        }
+        
+        // Hide all original navigation menus if custom menu exists
+        if ($('#custom-horizontal-menu').length > 0) {
+           
+            $('.qodef-header-navigation').not('#custom-horizontal-menu').hide();
+        }
+        
+        // Ensure we have exactly one custom menu visible
+        if ($('.qodef-header-navigation:visible').length > 1) {
+           
+            // Keep only the custom menu or the first original
+            if ($('#custom-horizontal-menu').length > 0) {
+                $('.qodef-header-navigation:visible').not('#custom-horizontal-menu').hide();
+            } else {
+                $('.qodef-header-navigation:visible').not(':first').hide();
+            }
+        }
+    }
+    
     // Function to force horizontal menu layout using direct DOM manipulation
     function forceHorizontalMenuLayout() {
-        console.log("Forcing horizontal menu layout with nuclear approach");
         
         try {
             // Get the top navigation and menu items
@@ -1078,8 +1196,10 @@
             const $menuList = $navigation.find('> ul').first();
             const $menuItems = $menuList.find('> li');
             
+            // First, remove any extra existing custom menus to prevent duplication
+            $('#custom-horizontal-menu').not(':first').remove();
+            
             if ($navigation.length && $menuList.length && $menuItems.length) {
-                console.log(`Found menu with ${$menuItems.length} top-level items`);
                 
                 // NUCLEAR OPTION: Complete menu rebuild with hardcoded inline styles
                 
@@ -1116,16 +1236,33 @@
                             z-index: 999 !important;
                         }
                         
-                        /* Hide old navigation */
-                        .qodef-header-navigation {
+                        /* Hide original navigation - we'll only use our custom one */
+                        .qodef-header-navigation:not(#custom-horizontal-menu) {
                             display: none !important;
+                            visibility: hidden !important;
+                            position: absolute !important;
+                            overflow: hidden !important;
+                            clip: rect(0, 0, 0, 0) !important;
+                            width: 1px !important;
+                            height: 1px !important;
+                            margin: -1px !important;
+                            border: 0 !important;
+                            padding: 0 !important;
                         }
                         
-                        /* Custom horizontal navigation style */
+                        /* Custom horizontal navigation style - with priority flag */
                         #custom-horizontal-menu {
                             display: flex !important;
                             order: 1 !important;
                             margin-right: auto !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
+                            position: relative !important;
+                            float: left !important;
+                            width: auto !important;
+                            height: auto !important;
+                            pointer-events: auto !important;
+                            z-index: 100 !important;
                         }
                         
                         #custom-horizontal-menu-list {
@@ -1136,6 +1273,10 @@
                             list-style: none !important;
                             margin: 0 !important;
                             padding: 0 !important;
+                            width: auto !important;
+                            height: auto !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
                         }
                         
                         #custom-horizontal-menu-list > li {
@@ -1143,6 +1284,9 @@
                             float: left !important;
                             margin-right: 25px !important;
                             position: relative !important;
+                            height: auto !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
                         }
                         
                         #custom-horizontal-menu-list > li > a {
@@ -1155,35 +1299,79 @@
                             letter-spacing: 0.5px !important;
                             color: inherit !important;
                             text-decoration: none !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
+                            cursor: pointer !important;
+                        }
+                        
+                        /* Hide subcategory content by default */
+                        .mega-menu-subcategory-content {
+                            display: none !important;
+                            visibility: hidden !important;
+                            opacity: 0 !important;
+                            pointer-events: none !important;
+                            height: 0 !important;
+                        }
+                        
+                        /* Hide subcategory sections by default */
+                        .mega-menu-subcategory-section {
+                            display: none !important;
+                            visibility: hidden !important;
+                            opacity: 0 !important;
+                            pointer-events: none !important;
+                            height: 0 !important;
+                        }
+                        
+                        /* Show subcategory content only when active and hovered */
+                        .mega-menu-subcategory-content.active {
+                            display: flex !important;
+                            flex-direction: row !important;
+                            flex-wrap: wrap !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
+                            pointer-events: auto !important;
+                            height: auto !important;
+                        }
+                        
+                        /* Show subcategory sections only when active and hovered */
+                        .mega-menu-subcategory-content.active .mega-menu-subcategory-section {
+                            display: block !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
+                            pointer-events: auto !important;
+                            height: auto !important;
                         }
                     </style>
                 `);
                 
-                // Create the custom navigation container
-                const $customNav = $('<nav id="custom-horizontal-menu" class="qodef-header-navigation"></nav>');
-                const $customList = $('<ul id="custom-horizontal-menu-list"></ul>');
-                
-                // Build new menu items with inline styles
-                menuItems.forEach(function(item, index) {
-                    const $newItem = $(`<li style="display: inline-block !important; float: left !important; margin-right: 25px !important; position: relative !important; height: auto !important;" class="${item.classes}"></li>`);
+                // Only create the custom menu if it doesn't already exist
+                if (!$('#custom-horizontal-menu').length) {
+                    // Create the custom navigation container
+                    const $customNav = $('<nav id="custom-horizontal-menu" class="qodef-header-navigation"></nav>');
+                    const $customList = $('<ul id="custom-horizontal-menu-list"></ul>');
                     
-                    const $newLink = $(`<a href="${item.href}" style="display: inline-block !important; padding: 25px 0 !important; white-space: nowrap !important; font-weight: 500 !important; text-transform: uppercase !important;">${item.text}</a>`);
+                    // Build new menu items with inline styles
+                    menuItems.forEach(function(item, index) {
+                        const $newItem = $(`<li style="display: inline-block !important; float: left !important; margin-right: 25px !important; position: relative !important; height: auto !important;" class="${item.classes}"></li>`);
+                        
+                        const $newLink = $(`<a href="${item.href}" style="display: inline-block !important; padding: 25px 0 !important; white-space: nowrap !important; font-weight: 500 !important; text-transform: uppercase !important;">${item.text}</a>`);
+                        
+                        $newItem.append($newLink);
+                        
+                        // Add dropdown if necessary
+                        if (item.hasDropdown) {
+                            $newItem.append(item.dropdown);
+                        }
+                        
+                        $customList.append($newItem);
+                    });
                     
-                    $newItem.append($newLink);
+                    $customNav.append($customList);
                     
-                    // Add dropdown if necessary
-                    if (item.hasDropdown) {
-                        $newItem.append(item.dropdown);
-                    }
-                    
-                    $customList.append($newItem);
-                });
-                
-                $customNav.append($customList);
-                
-                // Replace the original navigation
-                $navigation.after($customNav);
-                $navigation.hide();
+                    // Replace the original navigation
+                    $navigation.after($customNav);
+                    $navigation.hide();
+                }
                 
                 // Apply header layout fixes
                 const $header = $('#qodef-page-header-inner');
@@ -1215,7 +1403,7 @@
                     });
                 }
                 
-                // Re-apply hover event handlers to the new menu
+                // Re-apply hover event handlers to the menu
                 $('#custom-horizontal-menu-list > li').each(function() {
                     const $menuItem = $(this);
                     const $menuLink = $menuItem.children('a');
@@ -1301,12 +1489,9 @@
                     }
                 });
                 
-                console.log("Nuclear menu rebuild complete with " + menuItems.length + " items");
             } else {
-                console.log("Could not find navigation elements to enforce horizontal layout");
             }
         } catch (error) {
-            console.error("Error in horizontal menu fix:", error);
         }
     }
     
@@ -1314,19 +1499,21 @@
     setInterval(function() {
         try {
             // Check if any menus are opened without hover
-            if (!$('#custom-horizontal-menu-list > li:hover').length && 
-                !$('.qodef-header-navigation > ul > li:hover').length && 
-                !$('.sub-menu:visible').closest(':hover').length && 
-                !$('.qodef-drop-down-second:visible').closest(':hover').length &&
-                ($('.sub-menu:visible').length || $('.qodef-drop-down-second:visible').length)) {
-                console.log("Detected open menu without hover, fixing...");
+            if (($('.sub-menu:visible').length || $('.qodef-drop-down-second:visible').length) && 
+                !$('#custom-horizontal-menu-list > li').filter(function() { return $(this).is(':hover'); }).length &&
+                !$('.qodef-header-navigation > ul > li').filter(function() { return $(this).is(':hover'); }).length && 
+                !$('.sub-menu:visible').closest('li').filter(function() { return $(this).is(':hover'); }).length && 
+                !$('.qodef-drop-down-second:visible').closest('li').filter(function() { return $(this).is(':hover'); }).length) {
+               
                 hideAllMenusImmediately();
             }
             
-            // Periodically check if the custom menu exists, rebuild if not, but prevent multiple rebuilds
-            if ((!$('#custom-horizontal-menu').length || 
-                $('#custom-horizontal-menu-list > li').length === 0) && !menuRebuildInProgress) {
-                console.log("Custom menu missing or empty, rebuilding");
+            // Clean up any duplicate menus
+            cleanupDuplicateMenus();
+            
+            // Only rebuild menu if it's completely missing
+            if ($('#custom-horizontal-menu').length === 0 && !menuRebuildInProgress) {
+
                 menuRebuildInProgress = true;
                 forceHorizontalMenuLayout();
                 // Reset the flag after rebuild
@@ -1335,7 +1522,7 @@
                 }, 2000);
             }
         } catch (error) {
-            console.error("Error in menu check interval:", error);
+            
             menuRebuildInProgress = false;
         }
     }, 1000);
@@ -1345,50 +1532,39 @@
         const $menuItem = $(menuSelector || '.qodef-header-navigation > ul > li:contains("SHOP")');
         
         if ($menuItem.length) {
-            console.log(`Testing hover on ${$menuItem.text().trim()} menu item`);
+           
             $menuItem.trigger('mouseenter');
             
             setTimeout(function() {
                 const $dropdown = $menuItem.find('.sub-menu, .qodef-drop-down-second').first();
                 if ($dropdown.length) {
-                    console.log(`Dropdown found and is visible: ${$dropdown.is(':visible')}`);
-                    console.log(`Dropdown classes: ${$dropdown.attr('class')}`);
-                    console.log(`Dropdown contents:`, $dropdown.html().substring(0, 100) + '...');
                     
                     // Count elements inside
                     const $innerContent = $dropdown.find('.qodef-drop-down-second-inner');
                     if ($innerContent.length) {
-                        console.log(`Inner content visible: ${$innerContent.is(':visible')}`);
-                        console.log(`Inner UL elements: ${$innerContent.find('ul').length}`);
-                        console.log(`Inner LI elements: ${$innerContent.find('li').length}`);
-                        console.log(`Inner A elements: ${$innerContent.find('a').length}`);
+
                     }
                 } else {
-                    console.log(`No dropdown found for this menu item`);
                 }
             }, 100);
         } else {
-            console.log(`Menu item not found using selector: ${menuSelector || '.qodef-header-navigation > ul > li:contains("SHOP")'}`);
         }
     };
     
     // Update function inside jQuery to handle the interactive behavior
     function setupMegaMenuInteraction() {
-        console.log("Setting up mega menu interaction with category hovering");
-        
         // Find all mega menu containers
         $('.qodef-drop-down-second-inner').each(function() {
             const $megaMenu = $(this);
             
             // Create the mega menu structure if it doesn't exist yet
             if (!$megaMenu.find('.mega-menu-categories').length) {
-                console.log("Creating mega menu structure");
                 
                 // Extract existing menu items
                 const $originalItems = $megaMenu.find('> ul > li');
                 
                 if ($originalItems.length === 0) {
-                    console.log("No original items found, skipping structure creation");
+                   
                     return;
                 }
                 
@@ -1396,6 +1572,40 @@
                 const $categoriesContainer = $('<div class="mega-menu-categories"></div>');
                 const $subcategoriesContainer = $('<div class="mega-menu-subcategories"></div>');
                 const $featuredSection = $('<div class="mega-menu-featured-section"></div>');
+                
+                // Apply CSS to position the categories on the left and subcategories on the right
+                $categoriesContainer.css({
+                    'width': '240px',
+                    'min-width': '240px',
+                    'float': 'left',
+                    'position': 'relative',
+                    'z-index': '100',
+                    'padding-right': '10px',
+                    'border-right': '1px solid #f0f0f0',
+                    'margin-right': '20px',
+                    'visibility': 'visible',
+                    'opacity': '1',
+                    'display': 'block',
+                    'height': 'auto',
+                    'overflow-y': 'visible',
+                    'max-height': 'none'
+                });
+                
+                // Force hide subcategories container
+                $subcategoriesContainer.css({
+                    'display': 'none',
+                    'visibility': 'hidden',
+                    'opacity': '0',
+                    'pointer-events': 'none',
+                    'height': '0',
+                    'width': '0',
+                    'position': 'absolute',
+                    'clip': 'rect(0, 0, 0, 0)',
+                    'margin': '-1px',
+                    'float': 'left',
+                    'flex': '1',
+                    'padding': '0 20px'
+                }).hide();
                 
                 // Empty the mega menu and add the new structure
                 $megaMenu.empty().append($categoriesContainer).append($subcategoriesContainer).append($featuredSection);
@@ -1421,16 +1631,42 @@
                     const itemTitle = $item.find('> a').text().trim();
                     const hasSubmenu = $item.find('ul').length > 0;
                     
+                    // Skip empty items
+                    if (!itemTitle) {
+                        return;
+                    }
+                    
                     // Add category item to the categories container
                     const categoryId = `category-${index}`;
                     const iconClass = getIconForCategory(itemTitle);
+                    const originalItemHref = $item.find('> a').attr('href') || '#';
                     
                     const $categoryItem = $(`
-                        <div class="mega-menu-category-item ${hasSubmenu ? 'mega-menu-category-item-with-children' : ''}" data-category="${categoryId}">
+                        <div class="mega-menu-category-item ${hasSubmenu ? 'mega-menu-category-item-with-children' : ''}" data-category="${categoryId}" data-href="${originalItemHref}">
                             <span class="category-icon">${iconClass}</span>
-                            <span>${itemTitle}</span>
+                            <span class="category-title">${itemTitle}</span>
                         </div>
                     `);
+                    
+                    // Apply inline styles to ensure visibility
+                    $categoryItem.css({
+                        'display': 'flex',
+                        'align-items': 'center',
+                        'padding': '10px 15px',
+                        'margin-bottom': '5px',
+                        'cursor': 'pointer',
+                        'font-size': '14px',
+                        'color': '#333',
+                        'border-radius': '4px',
+                        'transition': 'all 0.2s ease',
+                        'background-color': 'transparent',
+                        'visibility': 'visible',
+                        'opacity': '1',
+                        'height': 'auto',
+                        'width': 'auto',
+                        'overflow': 'visible',
+                        'pointer-events': 'auto'
+                    });
                     
                     $categoriesContainer.append($categoryItem);
                     
@@ -1440,12 +1676,35 @@
                         
                         // Create subcategory container
                         const $subcategoryContent = $(`<div class="mega-menu-subcategory-content" data-category="${categoryId}"></div>`);
+                        
+                        // Initial styling for subcategory content (will be shown on hover)
+                        $subcategoryContent
+                            .css({
+                                'display': 'none',
+                                'visibility': 'hidden',
+                                'opacity': '0',
+                                'pointer-events': 'none',
+                                'height': '0',
+                                'width': '0',
+                                'overflow': 'hidden',
+                                'position': 'absolute',
+                                'margin': '-1px'
+                            })
+                            .hide()
+                            .attr('aria-hidden', 'true');
+                        
                         $subcategoriesContainer.append($subcategoryContent);
                         
                         // Process each subcategory
                         $subcategories.each(function() {
                             const $subItem = $(this);
                             const subItemTitle = $subItem.find('> a').text().trim();
+                            
+                            // Skip empty items
+                            if (!subItemTitle) {
+                                return;
+                            }
+                            
                             const $subItemLinks = $subItem.find('> ul > li');
                             const subIconClass = getIconForSubcategory(subItemTitle);
                             
@@ -1460,6 +1719,23 @@
                                 </div>
                             `);
                             
+                            // Force hide section by default
+                            $subcategorySection
+                                .css({
+                                    'display': 'none',
+                                    'visibility': 'hidden',
+                                    'opacity': '0',
+                                    'pointer-events': 'none',
+                                    'height': '0',
+                                    'width': '0',
+                                    'overflow': 'hidden',
+                                    'clip': 'rect(0, 0, 0, 0)',
+                                    'position': 'absolute',
+                                    'margin': '-1px'
+                                })
+                                .hide()
+                                .attr('aria-hidden', 'true');
+                            
                             const $linksList = $subcategorySection.find('.mega-menu-subcategory-links');
                             
                             // Add links if they exist
@@ -1468,6 +1744,12 @@
                                     const $link = $(this).find('> a');
                                     const linkText = $link.text().trim();
                                     const linkUrl = $link.attr('href');
+                                    
+                                    // Skip items with undefined URLs
+                                    if (linkUrl === 'undefined' || !linkUrl) {
+                                        return;
+                                    }
+                                    
                                     const linkIconClass = getLinkIcon(linkText);
                                     
                                     $linksList.append(`
@@ -1485,6 +1767,11 @@
                                 const $directLink = $subItem.find('> a');
                                 const directLinkUrl = $directLink.attr('href');
                                 
+                                // Skip items with undefined URLs
+                                if (directLinkUrl === 'undefined' || !directLinkUrl) {
+                                    return;
+                                }
+                                
                                 $linksList.append(`
                                     <li>
                                         <a href="${directLinkUrl}" class="mega-menu-subcategory-link">
@@ -1495,34 +1782,259 @@
                                 `);
                             }
                             
-                            $subcategoryContent.append($subcategorySection);
+                            // Only add if it has content
+                            if ($linksList.find('li').length > 0) {
+                                $subcategoryContent.append($subcategorySection);
+                            }
                         });
                     }
                 });
+                
+                // Hide all subcategory sections initially
+                $('.mega-menu-subcategory-section, .mega-menu-subcategory-content, .mega-menu-subcategories')
+                    .css({
+                        'display': 'none',
+                        'visibility': 'hidden',
+                        'opacity': '0',
+                        'pointer-events': 'none',
+                        'height': '0',
+                        'width': '0',
+                        'overflow': 'hidden',
+                        'clip': 'rect(0, 0, 0, 0)',
+                        'position': 'absolute',
+                        'margin': '-1px'
+                    })
+                    .hide()
+                    .attr('aria-hidden', 'true')
+                    .removeClass('active');
                 
                 // Event handlers for category items
                 $categoriesContainer.find('.mega-menu-category-item').on('mouseenter', function() {
                     const categoryId = $(this).data('category');
                     
+                    // First hide everything
+                    $('.mega-menu-subcategory-content, .mega-menu-subcategory-section').css({
+                        'display': 'none',
+                        'visibility': 'hidden',
+                        'opacity': '0',
+                        'pointer-events': 'none',
+                        'height': '0',
+                        'width': '0',
+                        'overflow': 'hidden',
+                        'clip': 'rect(0, 0, 0, 0)',
+                        'position': 'absolute',
+                        'margin': '-1px'
+                    }).hide().removeClass('active');
+                    
                     // Remove active class from all categories and add to current
                     $categoriesContainer.find('.mega-menu-category-item').removeClass('active');
                     $(this).addClass('active');
                     
-                    // Hide all subcategory contents and show current
-                    $subcategoriesContainer.find('.mega-menu-subcategory-content').removeClass('active').hide();
+                    // Get the current subcategory content
                     const $currentSubcategory = $subcategoriesContainer.find(`.mega-menu-subcategory-content[data-category="${categoryId}"]`);
-                    $currentSubcategory.addClass('active').show();
                     
-                    // Show subcategories container if the current category has subcategories
                     if ($currentSubcategory.length) {
-                        $subcategoriesContainer.addClass('active').show();
+                        // Show the subcategories container first with enhanced visibility
+                        $subcategoriesContainer.css({
+                            'display': 'flex',
+                            'flex-direction': 'row',
+                            'flex-wrap': 'wrap',
+                            'visibility': 'visible',
+                            'opacity': '1',
+                            'pointer-events': 'auto',
+                            'height': 'auto',
+                            'width': 'auto',
+                            'position': 'relative',
+                            'margin': '0',
+                            'float': 'left',
+                            'flex': '1',
+                            'padding': '0 20px',
+                            'z-index': '200',
+                            'background-color': '#fff'
+                        }).addClass('active').show();
+                        
+                        // Show only the current subcategory content with enhanced visibility
+                        $currentSubcategory.css({
+                            'display': 'flex',
+                            'flex-direction': 'row',
+                            'flex-wrap': 'wrap',
+                            'visibility': 'visible',
+                            'opacity': '1',
+                            'pointer-events': 'auto',
+                            'height': 'auto',
+                            'width': '100%',
+                            'position': 'relative',
+                            'margin': '0',
+                            'z-index': '201'
+                        }).addClass('active').show().attr('aria-hidden', 'false');
+                        
+                        // Show the subcategory sections within this category with enhanced visibility
+                        $currentSubcategory.find('.mega-menu-subcategory-section').css({
+                            'display': 'block',
+                            'visibility': 'visible',
+                            'opacity': '1',
+                            'pointer-events': 'auto',
+                            'height': 'auto',
+                            'width': 'auto',
+                            'max-width': '25%',
+                            'position': 'relative',
+                            'margin': '10px',
+                            'float': 'left',
+                            'min-width': '200px',
+                            'background-color': '#fff',
+                            'box-shadow': '0px 2px 8px rgba(0,0,0,0.1)',
+                            'border-radius': '4px',
+                            'padding': '15px',
+                            'z-index': '202'
+                        }).show().attr('aria-hidden', 'false');
+                        
+                        // Make sure all child elements are visible
+                        $currentSubcategory.find('.mega-menu-subcategory-title, .mega-menu-subcategory-links, .mega-menu-subcategory-link').css({
+                            'display': 'block',
+                            'visibility': 'visible',
+                            'opacity': '1',
+                            'pointer-events': 'auto'
+                        });
                     } else {
-                        $subcategoriesContainer.removeClass('active').hide();
+                        // Hide subcategories container if no subcategories
+                        $subcategoriesContainer.css({
+                            'display': 'none',
+                            'visibility': 'hidden',
+                            'opacity': '0',
+                            'pointer-events': 'none',
+                            'height': '0',
+                            'width': '0',
+                            'position': 'absolute',
+                            'clip': 'rect(0, 0, 0, 0)',
+                            'margin': '-1px'
+                        }).removeClass('active').hide();
+                    }
+                }).on('mouseleave', function() {
+                    // Only hide if we're not entering the subcategory content
+                    if (!$subcategoriesContainer.is(':hover') && 
+                        !$('.mega-menu-subcategory-content:hover').length) {
+                        $subcategoriesContainer.css({
+                            'display': 'none',
+                            'visibility': 'hidden',
+                            'opacity': '0',
+                            'pointer-events': 'none',
+                            'height': '0',
+                            'width': '0',
+                            'position': 'absolute',
+                            'clip': 'rect(0, 0, 0, 0)',
+                            'margin': '-1px'
+                        }).removeClass('active').hide();
+                    
+                        $('.mega-menu-subcategory-content, .mega-menu-subcategory-section').css({
+                            'display': 'none',
+                            'visibility': 'hidden',
+                            'opacity': '0',
+                            'pointer-events': 'none',
+                            'height': '0',
+                            'width': '0',
+                            'position': 'absolute',
+                            'clip': 'rect(0, 0, 0, 0)',
+                            'margin': '-1px'
+                        }).removeClass('active').hide();
                     }
                 });
                 
-                // Activate first category by default
-                $categoriesContainer.find('.mega-menu-category-item').first().trigger('mouseenter');
+                // Add click handler to category items for redirects with proper event propagation control
+                $categoriesContainer.find('.mega-menu-category-item').on('click', function(e) {
+                    // Get the current subcategory content
+                    const categoryId = $(this).data('category');
+                    const href = $(this).data('href');
+                    
+                    // Log for debugging
+                    console.log("Category clicked:", $(this).text().trim(), "href:", href, "categoryId:", categoryId);
+                    
+                    // Only prevent default if it's a submenu click with children
+                    if ($(this).hasClass('mega-menu-category-item-with-children')) {
+                        // Don't immediately redirect if this item has children,
+                        // instead show subcategories first
+                        e.preventDefault();
+                        e.stopPropagation(); // Prevent event bubbling
+                        
+                        // Show relevant subcategory content first (for better UX)
+                        const $currentSubcategory = $subcategoriesContainer.find(`.mega-menu-subcategory-content[data-category="${categoryId}"]`);
+                        
+                        if ($currentSubcategory.length) {
+                            // Show the subcategories container with explicit styling
+                            $subcategoriesContainer.addClass('active').css({
+                                'display': 'flex',
+                                'visibility': 'visible',
+                                'opacity': '1',
+                                'pointer-events': 'auto',
+                                'height': 'auto',
+                                'width': 'auto',
+                                'position': 'relative',
+                                'margin': '0',
+                                'clip': 'auto',
+                                'overflow': 'visible'
+                            }).show();
+                            
+                            // Show only the current subcategory content with explicit styling
+                            $currentSubcategory.addClass('active').css({
+                                'display': 'flex',
+                                'visibility': 'visible',
+                                'opacity': '1',
+                                'pointer-events': 'auto',
+                                'height': 'auto',
+                                'width': 'auto',
+                                'position': 'relative',
+                                'margin': '0',
+                                'clip': 'auto',
+                                'overflow': 'visible'
+                            }).show();
+                            
+                            // Add a slight delay before redirect for better UX
+                            if (href && href !== '#' && href !== 'undefined') {
+                                console.log("Will navigate to:", href);
+                                setTimeout(function() {
+                                    window.location.href = href;
+                                }, 200);
+                            }
+                        }
+                    } else {
+                        // Direct redirect for items without children
+                        console.log("Direct redirect to:", href);
+                        if (href && href !== '#' && href !== 'undefined') {
+                            e.preventDefault(); // Prevent any default behavior
+                            e.stopPropagation(); // Stop any event bubbling
+                            window.location.href = href;
+                        }
+                    }
+                });
+                
+                // Event handler for when user leaves the mega menu completely
+                $megaMenu.closest('.qodef-drop-down-second').on('mouseleave', function() {
+                    // Hide everything after a delay
+                    setTimeout(function() {
+                        if (!$megaMenu.is(':hover') && 
+                            !$megaMenu.closest('.qodef-drop-down-second').is(':hover')) {
+                            hideAllSubcategorySections();
+                            
+                            // Hide subcategories container
+                            $subcategoriesContainer.css({
+                                'display': 'none',
+                                'visibility': 'hidden',
+                                'opacity': '0',
+                                'pointer-events': 'none',
+                                'height': '0',
+                                'width': '0',
+                                'position': 'absolute',
+                                'clip': 'rect(0, 0, 0, 0)',
+                                'margin': '-1px'
+                            }).removeClass('active').hide();
+                            
+                            // Remove active class from all categories
+                            $categoriesContainer.find('.mega-menu-category-item').removeClass('active');
+                        }
+                    }, 200);
+                });
+                
+                // Make sure all subcategories are hidden initially
+                hideAllSubcategorySections();
             }
         });
     }
@@ -1630,8 +2142,202 @@
             });
             
             // Log that hover-visible functionality is set up
-            console.log('Hover-visible functionality initialized');
         }, 500); // Small delay to ensure other scripts have run
     });
+
+    // Function to hide all subcategory sections and content
+    function hideAllSubcategorySections() {
+        
+        // Specifically target and hide all subcategory-related elements
+        $('.mega-menu-subcategories, .mega-menu-subcategory-content, .mega-menu-subcategory-section').css({
+            'display': 'none !important',
+            'visibility': 'hidden !important',
+            'opacity': '0 !important',
+            'pointer-events': 'none !important',
+            'height': '0 !important',
+            'width': '0 !important',
+            'overflow': 'hidden !important',
+            'clip': 'rect(1px, 1px, 1px, 1px) !important',
+            'position': 'absolute !important',
+            'margin': '-1px !important'
+        }).hide().removeClass('active hover-visible');
+        
+        // Directly target sections by their content
+        $('[class*="subcategory"][class*="section"]:contains("The Emperor"), ' +
+          '[class*="subcategory"][class*="section"]:contains("The Empress"), ' +
+          '[class*="subcategory"][class*="section"]:contains("Shop"), ' +
+          '[class*="subcategory"][class*="section"]:contains("Sale"), ' +
+          '[class*="subcategory"][class*="section"]:contains("My Account"), ' + 
+          '[class*="subcategory"][class*="section"]:contains("Cart"), ' +
+          '[class*="subcategory"][class*="section"]:contains("Checkout"), ' +
+          '[class*="subcategory"][class*="section"]:contains("Wishlist"), ' +
+          '[class*="subcategory"][class*="section"]:contains("Order")').css({
+            'display': 'none !important',
+            'visibility': 'hidden !important',
+            'opacity': '0 !important',
+            'height': '0 !important',
+            'width': '0 !important',
+            'overflow': 'hidden !important',
+            'clip': 'rect(0, 0, 0, 0) !important',
+            'position': 'absolute !important'
+        }).hide();
+        
+        // Hide empty sections
+        $('.mega-menu-subcategory-title:empty').closest('.mega-menu-subcategory-section').css({
+            'display': 'none !important',
+            'visibility': 'hidden !important',
+            'opacity': '0 !important'
+        }).hide();
+        
+        // Hide links with undefined URLs
+        $('a[href="undefined"]').closest('li').css({
+            'display': 'none !important', 
+            'visibility': 'hidden !important',
+            'opacity': '0 !important'
+        }).hide();
+        
+        // Remove all active classes
+        $('.mega-menu-subcategories').removeClass('active');
+        $('.mega-menu-subcategory-content').removeClass('active');
+        $('.mega-menu-subcategory-section').removeClass('active');
+    }
+
+    // Function to clean up empty or invalid menu sections
+    function cleanupEmptyMenuSections() {
+        
+        // Hide empty sections or sections with empty titles
+        $('.mega-menu-subcategory-title:empty').closest('.mega-menu-subcategory-section').remove();
+        
+        // Hide sections with no content or only whitespace
+        $('.mega-menu-subcategory-title').each(function() {
+            if ($(this).text().trim() === '') {
+                $(this).closest('.mega-menu-subcategory-section').remove();
+            }
+        });
+        
+        // Remove sections with undefined URLs
+        $('a[href="undefined"]').closest('.mega-menu-subcategory-section').remove();
+        
+        // Remove empty subcategory contents
+        $('.mega-menu-subcategory-content').each(function() {
+            if ($(this).children().length === 0) {
+                $(this).remove();
+            }
+        });
+    }
+    
+    // Run this function periodically to ensure menu stays clean
+    setInterval(function() {
+        try {
+            // Run cleanup and hide functions to keep menu tidy
+            cleanupEmptyMenuSections();
+            hideAllSubcategorySections();
+        } catch (error) {
+        }
+    }, 2000);
+    
+    // Also run when the window is loaded
+    $(window).on('load', function() {
+        
+        // Force close dropdowns again
+        hideAllMenusImmediately();
+        
+        // Hide all subcategory sections
+        hideAllSubcategorySections();
+        
+        // Clean up empty menu sections
+        cleanupEmptyMenuSections();
+        
+        // Clean up any duplicate menus
+        cleanupDuplicateMenus();
+        
+        // Run the fix function again
+        setTimeout(function() {
+            fixMenuPositioning();
+            forceHorizontalMenuLayout();
+            
+            // Hide subcategory sections again after a delay
+            setTimeout(function() {
+                hideAllSubcategorySections();
+                cleanupEmptyMenuSections();
+            }, 500);
+        }, 100);
+    });
+
+    // Periodically rebind click events to ensure they work after DOM changes
+    setInterval(function() {
+        try {
+            // Ensure click events are bound to all category items
+            $('.mega-menu-category-item').each(function() {
+                const $item = $(this);
+                
+                // Remove existing click handler to prevent duplication
+                $item.off('click.menuFix');
+                
+                // Apply inline styles to ensure clickability
+                $item.css({
+                    'cursor': 'pointer',
+                    'pointer-events': 'auto'
+                });
+                
+                // Add new click handler
+                $item.on('click.menuFix', function(e) {
+                    const href = $(this).data('href');
+                    const categoryId = $(this).data('category');
+                    const hasChildren = $(this).hasClass('mega-menu-category-item-with-children');
+                    
+                    console.log("Category re-clicked:", $(this).text().trim(), "href:", href);
+                    
+                    if (hasChildren) {
+                        // Handle submenu case
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // Show subcategories
+                        const $subcategoriesContainer = $(this).closest('.mega-menu-categories').siblings('.mega-menu-subcategories');
+                        const $currentSubcategory = $subcategoriesContainer.find(`.mega-menu-subcategory-content[data-category="${categoryId}"]`);
+                        
+                        if ($currentSubcategory.length) {
+                            $subcategoriesContainer.addClass('active').show();
+                            $currentSubcategory.addClass('active').show();
+                        }
+                        
+                        // Navigate after delay if href is valid
+                        if (href && href !== '#' && href !== 'undefined') {
+                            setTimeout(function() {
+                                window.location.href = href;
+                            }, 200);
+                        }
+                    } else if (href && href !== '#' && href !== 'undefined') {
+                        // Direct navigation for items without children
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.location.href = href;
+                    }
+                });
+            });
+        } catch (error) {
+            console.error("Error rebinding menu click events:", error);
+        }
+    }, 1000);
+
+    // Improve overall pointer-events handling
+    function fixPointerEvents() {
+        // Ensure clickable elements have proper pointer-events
+        $('.mega-menu-category-item, .mega-menu-subcategory-link').css({
+            'pointer-events': 'auto',
+            'cursor': 'pointer'
+        });
+        
+        // Ensure parent containers allow pointer events
+        $('.mega-menu-categories, .qodef-drop-down-second-inner').css({
+            'pointer-events': 'auto'
+        });
+    }
+
+    // Run pointer events fix on load and periodically
+    $(document).ready(fixPointerEvents);
+    $(window).on('load', fixPointerEvents);
+    setInterval(fixPointerEvents, 2000);
 
 })(jQuery); 
