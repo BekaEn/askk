@@ -1,0 +1,25 @@
+1.2.1
+- Updated Askka Core plugin to 1.0.2
+- Updated Revolution Slider plugin to 6.6.15
+- Fixed Call to undefined function masterds_core_get_google_maps_api_key fatal error
+
+1.2
+- Added WordPress 6.2.2 compatibility
+- Added WooCommerce 7.8.1 compatibility
+- Updated Qode Framework Plugin to 1.2.2
+- Updated Revolution Slider plugin to 6.6.14
+
+1.1
+- Added WordPress 6.2 compatibility
+- Added WooCommerce 7.5.1 compatibility
+- Updated Qode Framework Plugin to 1.2.1
+- Updated Askka Core plugin to 1.0.1
+- Updated Revolution Slider plugin to 6.6.12
+- Updated pot files
+- Improved themes security
+- Improved PHP8 compatibility
+- Improved Elementor compatibility
+- Improved custom sidebar area functionality
+- Improved Google maps API with a callback function
+- Disabled Google Fonts loading if global option (Enable Google Fonts) is set to No
+- Fixed minor bugs

@@ -1,0 +1,69 @@
+/**
+ * Logo Size Override
+ * This file contains highly specific selectors to force the logo to be a reasonable size
+ */
+
+/* Logo container sizing */
+.qodef-header-logo-link,
+#qodef-page-header .qodef-header-logo-link,
+#qodef-page-header-inner .qodef-header-logo-link,
+body header .qodef-header-logo-link {
+    max-width: 150px !important;
+    max-height: 80px !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+}
+
+/* Logo image sizing - with extremely specific selectors */
+.qodef-header-logo-link img,
+.qodef-header-logo-link a img,
+#qodef-page-header .qodef-header-logo-link img,
+#qodef-page-header-inner .qodef-header-logo-link img,
+body header .qodef-header-logo-link img,
+body #qodef-page-header img.qodef-header-logo-image,
+.qodef-header-logo-image,
+img.qodef-header-logo-image,
+.qodef-header-logo-link > a > img {
+    max-width: 150px !important;
+    max-height: 80px !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
+/* Mobile-specific logo sizing */
+@media only screen and (max-width: 1024px) {
+    .qodef-header-logo-link,
+    #qodef-page-header .qodef-header-logo-link,
+    .qodef-mobile-header-logo-link,
+    .qodef-header-logo-link img,
+    .qodef-header-logo-link a img,
+    #qodef-page-header .qodef-header-logo-link img,
+    .qodef-mobile-header-logo-link img {
+        max-width: 120px !important;
+        max-height: 60px !important;
+    }
+}
+
+/* Inline SVG logos */
+.qodef-header-logo-link svg,
+#qodef-page-header .qodef-header-logo-link svg {
+    max-width: 150px !important;
+    max-height: 80px !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+/* Reset any width/height attributes that might be set directly on the image element */
+.qodef-header-logo-link img[width],
+.qodef-header-logo-link img[height],
+#qodef-page-header .qodef-header-logo-link img[width],
+#qodef-page-header .qodef-header-logo-link img[height] {
+    width: auto !important;
+    height: auto !important;
+    max-width: 150px !important;
+    max-height: 80px !important;
+} 
