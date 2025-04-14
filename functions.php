@@ -98,14 +98,41 @@ if ( ! class_exists( 'Askka_Handler' ) ) {
 			// Hook to include additional scripts after theme's main script
 			do_action( 'askka_action_after_main_js' );
 			
-			// Add menu fix script with a unique version for cache busting
-			if (!wp_script_is('menu-fix-direct', 'enqueued')) {
-				wp_enqueue_script( 'menu-fix-direct', get_template_directory_uri() . '/js/menu-fix-direct.js', array('jquery'), '1.0.1', true );
+			// Add menu interactions (only if not already loaded via mega-menu-interaction)
+			if (!wp_script_is('menu-fix-direct', 'enqueued') && !wp_script_is('mega-menu-interaction', 'enqueued')) {
+				wp_enqueue_script('menu-fix-direct', get_template_directory_uri() . '/js/menu-fix-direct.js', array('jquery'), '1.0.1', true);
+				
+				// Localize the script with AJAX URL
+				wp_localize_script(
+					'menu-fix-direct',
+					'askka_params',
+					array(
+						'ajaxurl' => admin_url('admin-ajax.php')
+					)
+				);
 			}
 
 			// Include comment reply script
 			if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 				wp_enqueue_script( 'comment-reply' );
+			}
+
+			// Add mega menu interaction script with cache busting
+			if (!wp_script_is('mega-menu-interaction', 'enqueued')) {
+				wp_enqueue_script( 'mega-menu-interaction', get_template_directory_uri() . '/js/menu-fix-direct.js', array('jquery'), '1.0.1', true );
+				
+				// Enqueue the new mega menu CSS file
+				wp_enqueue_style( 'mega-menu-styles', get_template_directory_uri() . '/assets/css/mega-menu.css', array(), '1.0.1' );
+				
+				// Localize the script with the CSS path and AJAX URL
+				wp_localize_script(
+					'mega-menu-interaction',
+					'askka_mega_menu_vars',
+					array(
+						'cssPath' => get_template_directory_uri() . '/assets/css/menu-fix-style.css',
+						'ajaxurl' => admin_url('admin-ajax.php')
+					)
+				);
 			}
 		}
 
@@ -363,6 +390,47 @@ function askka_add_filter_custom_scripts() {
 add_action( 'wp_enqueue_scripts', 'askka_add_filter_custom_scripts', 20 );
 require_once get_stylesheet_directory() . '/assets/custom-menu-assets.php';
 
+
+/**
+ * Add AJAX endpoint to get bestseller products
+ */
+function askka_get_popular_products_callback() {
+	// Check nonce for security
+	// check_ajax_referer('askka_ajax_nonce', 'security');
+	
+	$limit = isset($_POST['limit']) ? intval($_POST['limit']) : 3;
+	
+	$args = array(
+		'post_type'      => 'product',
+		'meta_key'       => 'total_sales',
+		'orderby'        => 'meta_value_num',
+		'posts_per_page' => $limit,
+	);
+	
+	$products = array();
+	$loop = new WP_Query($args);
+	
+	if ($loop->have_posts()) {
+		while ($loop->have_posts()) {
+			$loop->the_post();
+			global $product;
+			
+			// Get product data
+			$products[] = array(
+				'title' => get_the_title(),
+				'url'   => get_permalink(),
+				'image' => get_the_post_thumbnail_url(get_the_ID(), 'thumbnail'),
+				'price' => $product->get_price_html(),
+			);
+		}
+		wp_reset_postdata();
+	}
+	
+	// Return success with products
+	wp_send_json_success($products);
+}
+add_action('wp_ajax_get_popular_products', 'askka_get_popular_products_callback');
+add_action('wp_ajax_nopriv_get_popular_products', 'askka_get_popular_products_callback');
 
 /**
  * Add custom filter styles
