@@ -787,30 +787,38 @@
     function setupMegaMenuInteraction() {
         // Find all mega menu containers
         $('.qodef-drop-down-second-inner').each(function() {
-            console.log('Setting up mega menu container:', this);
             const $megaMenu = $(this);
             
             // Get the original menu structure before modifying
             const $originalMenu = $megaMenu.find('> ul').first();
-            console.log('Original menu found:', $originalMenu.length > 0);
 
             // Create the mega menu structure if it doesn't exist yet
             if (!$megaMenu.find('.mega-menu-categories').length) {
-                console.log('Creating new mega menu structure');
-                
                 // Extract existing menu items from the original structure
                 const $originalItems = $originalMenu.find('> li');
-                console.log('Original menu items found:', $originalItems.length);
                 
                 if ($originalItems.length === 0) {
-                    console.log('No original items found, aborting setup');
                     return;
                 }
                 
                 // Create containers
                 const $categoriesContainer = $('<div class="mega-menu-categories"></div>');
-                const $subcategoriesContainer = $('<div class="mega-menu-subcategories"></div>');
                 const $featuredSection = $('<div class="mega-menu-featured-section"></div>');
+                
+                // Check if any items have submenus
+                let hasSubmenus = false;
+                $originalItems.each(function() {
+                    if ($(this).find('> ul').length > 0) {
+                        hasSubmenus = true;
+                        return false; // break the loop
+                    }
+                });
+                
+                // Only create subcategories container if there are submenus
+                let $subcategoriesContainer;
+                if (hasSubmenus) {
+                    $subcategoriesContainer = $('<div class="mega-menu-subcategories"></div>');
+                }
                 
                 // Process each original menu item
                 $originalItems.each(function(index) {
@@ -821,18 +829,7 @@
                     const hasSubmenu = $item.find('> ul').length > 0;
                     const $submenu = $item.find('> ul').first();
                     
-                    console.log('Processing menu item:', {
-                        title: itemTitle,
-                        url: itemUrl,
-                        hasSubmenu: hasSubmenu,
-                        subItems: hasSubmenu ? $submenu.find('> li').length : 0
-                    });
-
-                    // Skip empty items
-                    if (!itemTitle) {
-                        console.log('Skipping empty item');
-                        return;
-                    }
+                    if (!itemTitle) return;
 
                     // Create category item
                     const $categoryItem = $(`
@@ -847,8 +844,7 @@
                     $categoriesContainer.append($categoryItem);
 
                     // Process submenu if exists
-                    if (hasSubmenu) {
-                        console.log('Processing submenu for:', itemTitle);
+                    if (hasSubmenu && $subcategoriesContainer) {
                         const $subcategoryContent = $(`<div class="mega-menu-subcategory-content" data-category="category-${index}"></div>`);
                         
                         // Process each subcategory
@@ -859,12 +855,6 @@
                             const subUrl = $subLink.attr('href');
                             const hasSubSubMenu = $subItem.find('> ul').length > 0;
                             
-                            console.log('Processing subcategory:', {
-                                title: subTitle,
-                                url: subUrl,
-                                hasSubItems: hasSubSubMenu
-                            });
-
                             if (!subTitle) return;
 
                             const $subcategorySection = $(`
@@ -921,9 +911,14 @@
                 
                 // Empty the mega menu and add the new structure
                 $megaMenu.empty()
-                        .append($categoriesContainer)
-                        .append($subcategoriesContainer)
-                        .append($featuredSection);
+                        .append($categoriesContainer);
+                
+                // Only append subcategories container if it exists
+                if ($subcategoriesContainer) {
+                    $megaMenu.append($subcategoriesContainer);
+                }
+                
+                $megaMenu.append($featuredSection);
 
                 // Initialize featured section
                 loadPopularProducts($featuredSection);
@@ -933,7 +928,6 @@
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    console.log('Category interaction:', e.type);
                     const $item = $(this);
                     const categoryId = $item.data('category');
                     const hasChildren = $item.hasClass('mega-menu-category-item-with-children');
@@ -944,34 +938,17 @@
                     
                     // Hide all subcategory content first
                     $('.mega-menu-subcategory-content').removeClass('active').attr('aria-hidden', 'true');
-                    $('.mega-menu-subcategories').removeClass('active');
+                    $('.mega-menu-subcategories').removeClass('active').attr('aria-hidden', 'true');
                     
                     if (hasChildren) {
                         // Show subcategories for this category
                         const $subcategory = $(`.mega-menu-subcategory-content[data-category="${categoryId}"]`);
                         if ($subcategory.length) {
-                            $('.mega-menu-subcategories').addClass('active');
+                            $('.mega-menu-subcategories').addClass('active').attr('aria-hidden', 'false');
                             $subcategory.addClass('active').attr('aria-hidden', 'false');
                             $subcategory.find('.mega-menu-subcategory-section').attr('aria-hidden', 'false');
                         }
-                    } else if (e.type === 'click') {
-                        // If it's a click on an item without children, navigate to the URL
-                        const href = $item.data('href');
-                        if (href && href !== '#') {
-                            window.location.href = href;
-                        }
                     }
-                });
-
-                // Handle mouseleave for the entire dropdown
-                $megaMenu.closest('.qodef-drop-down-second').on('mouseleave', function() {
-                    setTimeout(() => {
-                        if (!$(this).is(':hover')) {
-                            $('.mega-menu-category-item').removeClass('active');
-                            $('.mega-menu-subcategory-content').removeClass('active').attr('aria-hidden', 'true');
-                            $('.mega-menu-subcategories').removeClass('active');
-                        }
-                    }, 200);
                 });
             }
         });

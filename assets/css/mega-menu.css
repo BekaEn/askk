@@ -557,29 +557,16 @@
 
 /* Hide elements with aria-hidden attribute */
 [aria-hidden="true"] {
-    display: none;
     visibility: hidden;
     opacity: 0;
     pointer-events: none;
-    height: 0;
-    width: 0;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    position: absolute;
-    margin: -1px;
 }
 
 /* Show elements with aria-hidden=false */
 [aria-hidden="false"] {
-    display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    height: auto !important;
-    width: auto !important;
-    position: relative !important;
-    margin: 0 !important;
-    clip: auto !important;
-    overflow: visible !important;
+    pointer-events: auto !important;
 }
 
 /* Animations */
@@ -592,4 +579,23 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Hide empty subcategories section */
+.mega-menu-subcategories:empty {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+}
+
+/* Adjust featured section when no subcategories */
+.mega-menu-subcategories:empty + .mega-menu-featured-section {
+    margin-left: 0 !important;
+    border-left: none !important;
 } 
